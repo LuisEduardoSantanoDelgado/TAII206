@@ -1,2 +1,0 @@
-# TAII206
-FastAPI
