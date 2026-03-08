@@ -1,0 +1,51 @@
+1. Construir y levantar los contenedores con Docker Compose
+docker-compose up --build
+
+2. Levantar los contenedores en segundo plano
+docker-compose up -d
+
+3. Detener los contenedores
+docker-compose down
+
+4. Construir las imágenes de Docker sin levantar los contenedores
+docker-compose build
+
+5. Ver los contenedores en ejecución
+docker ps
+
+6. Eliminar contenedores detenidos
+docker container prune
+
+# --------------------------- FastAPI ---------------------------
+
+7. Instalar dependencias de FastAPI
+pip install -r requirements.txt
+
+8. Ejecutar FastAPI usando Uvicorn
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+
+# --------------------------- Flask ---------------------------
+
+9. Instalar dependencias de Flask
+pip install -r requirements.txt
+
+10. Definir la app de Flask y el entorno
+export FLASK_APP=app.py
+export FLASK_ENV=development
+
+11. Levantar el servidor de Flask
+flask run --host=0.0.0.0 --port=5000
+
+12. Detener el servidor de Flask
+Ctrl + C  # Para detener el servidor
+
+13. Crear un contenedor Docker para Flask
+docker build -t flask_app .
+
+14. Ejecutar el contenedor Docker de Flask
+docker run -d -p 5000:5000 --name flask_app flask_app
+
+
+redoc
+docs
+python3 app.py
