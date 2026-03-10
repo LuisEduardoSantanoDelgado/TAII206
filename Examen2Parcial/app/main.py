@@ -12,8 +12,8 @@ app = FastAPI(
 
 security = HTTPBasic()
 
-USERNAME = "root"
-PASSWORD = "1234"
+usuario = "root"
+contraseña = "1234"
 
 citas = [
     {
@@ -34,8 +34,8 @@ citas = [
 
 
 def verificar_credenciales(credentials: HTTPBasicCredentials = Depends(security)):
-    usuario_correcto = secrets.compare_digest(credentials.username, USERNAME)
-    password_correcto = secrets.compare_digest(credentials.password, PASSWORD)
+    usuario_correcto = secrets.compare_digest(credentials.username, usuario)
+    password_correcto = secrets.compare_digest(credentials.password, contraseña)
 
     if not (usuario_correcto and password_correcto):
         raise HTTPException(
@@ -84,19 +84,10 @@ class ConfirmarCita(BaseModel):
     confirmada: bool = Field(..., description="Estado de confirmación", example=True)
 
 
-@app.get("/", tags=["Inicio"])
-async def inicio():
-    return {"mensaje": "Hola mundo FastAPI - Gestión de Citas"}
-
 
 @app.post("/v1/citas/crear", tags=["Citas"], status_code=status.HTTP_201_CREATED)
 async def crear_cita(cita: CitaBase):
-    for c in citas:
-        if c["id"] == cita.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"El id {cita.id} ya existe. Por favor, elige otro id."
-            )
+
 
     citas_mismo_paciente_mismo_dia = 0
     for c in citas:
@@ -130,7 +121,8 @@ async def listar_citas(usuario: str = Depends(verificar_credenciales)):
     }
 
 
-@app.get("/v1/citas/{id}", tags=["Citas"])
+
+@app.get("/v1/citas/{id}/consulta", tags=["Citas"])
 async def consultar_cita_por_id(id: int):
     for c in citas:
         if c["id"] == id:
@@ -162,7 +154,7 @@ async def confirmar_cita(id: int, datos_confirmacion: ConfirmarCita):
     )
 
 
-@app.delete("/v1/citas/{id}", tags=["Citas"])
+@app.delete("/v1/citas/{id}/eliminar", tags=["Citas"])
 async def eliminar_cita(id: int, usuario: str = Depends(verificar_credenciales)):
     for idx, c in enumerate(citas):
         if c["id"] == id:
