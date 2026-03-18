@@ -23,13 +23,7 @@ citas = [
         "motivo": "Consulta general",
         "confirmada": False
     },
-    {
-        "id": 2,
-        "nombre": "Luis Santano",
-        "fecha": "2026-04-20",
-        "motivo": "Revisión médica",
-        "confirmada": False
-    }
+
 ]
 
 
@@ -53,7 +47,7 @@ class CitaBase(BaseModel):
         min_length=5,
         max_length=100,
         description="Nombre del paciente",
-        example="Luis Eduardo"
+        example="joan"
     )
     fecha: date = Field(
         ...,
