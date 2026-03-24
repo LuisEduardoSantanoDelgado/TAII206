@@ -4,8 +4,10 @@ docker-compose up --build
 2. Levantar los contenedores en segundo plano
 docker-compose up -d
 
+
 3. Detener los contenedores
 docker-compose down
+docker-compose down -v 
 
 4. Construir las imágenes de Docker sin levantar los contenedores
 docker-compose build
