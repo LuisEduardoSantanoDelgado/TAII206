@@ -1,7 +1,8 @@
 from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
+from typing import List
 
-from app.models.usuario import UsuarioBase
+from app.models.usuario import UsuarioCreate, UsuarioUpdate, UsuarioSchema
 from app.security.auth import verificar_peticion
 from app.data.db import get_db
 from app.data.usuario import Usuario
@@ -12,18 +13,32 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("/", response_model=None)
 async def consulta_usuarios(db: Session = Depends(get_db)):
-    consulta_usuarios = db.query(Usuario).all()
+    usuarios = db.query(Usuario).all()
     return {
         "status": 200,
-        "total": len(consulta_usuarios),
-        "data": consulta_usuarios
+        "total": len(usuarios),
+        "data": usuarios
+    }
+
+
+@router.get("/{id}")
+async def consulta_usuario_por_id(id: int, db: Session = Depends(get_db)):
+    usuario_db = db.query(Usuario).filter(Usuario.id == id).first()
+    if not usuario_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+    return {
+        "status": 200,
+        "data": usuario_db
     }
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def agregar_usuario(usuario: UsuarioBase, db: Session = Depends(get_db)):
+async def agregar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     nuevo_usuario = Usuario(
         nombre=usuario.nombre,
         edad=usuario.edad
@@ -40,9 +55,9 @@ async def agregar_usuario(usuario: UsuarioBase, db: Session = Depends(get_db)):
     }
 
 
-@router.put("/{nombre}", status_code=status.HTTP_200_OK)
-async def editar_usuario(nombre: str, usuario: UsuarioBase, db: Session = Depends(get_db)):
-    usuario_db = db.query(Usuario).filter(Usuario.nombre == nombre).first()
+@router.put("/{id}", status_code=status.HTTP_200_OK)
+async def editar_usuario(id: int, usuario: UsuarioCreate, db: Session = Depends(get_db)):
+    usuario_db = db.query(Usuario).filter(Usuario.id == id).first()
 
     if not usuario_db:
         raise HTTPException(
@@ -63,13 +78,37 @@ async def editar_usuario(nombre: str, usuario: UsuarioBase, db: Session = Depend
     }
 
 
-@router.delete("/{nombre}")
+@router.patch("/{id}", status_code=status.HTTP_200_OK)
+async def actualizar_usuario(id: int, usuario: UsuarioUpdate, db: Session = Depends(get_db)):
+    usuario_db = db.query(Usuario).filter(Usuario.id == id).first()
+
+    if not usuario_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+
+    update_data = usuario.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(usuario_db, key, value)
+
+    db.commit()
+    db.refresh(usuario_db)
+
+    return {
+        "mensaje": "Usuario actualizado",
+        "datos": usuario_db,
+        "status": 200
+    }
+
+
+@router.delete("/{id}")
 async def eliminar_usuario(
-    nombre: str,
+    id: int,
     usuarioAuth: str = Depends(verificar_peticion),
     db: Session = Depends(get_db)
 ):
-    usuario_db = db.query(Usuario).filter(Usuario.nombre == nombre).first()
+    usuario_db = db.query(Usuario).filter(Usuario.id == id).first()
 
     if not usuario_db:
         raise HTTPException(
@@ -81,6 +120,6 @@ async def eliminar_usuario(
     db.commit()
 
     return {
-        "mensaje": f"Usuario eliminado correctamente por {usuarioAuth}",
+        "mensaje": f"Usuario con ID {usuario_id} eliminado correctamente por {usuarioAuth}",
         "status": 200
     }

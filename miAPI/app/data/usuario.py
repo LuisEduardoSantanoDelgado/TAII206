@@ -5,5 +5,6 @@ from app.data.db import Base
 class Usuario(Base):
     __tablename__ = "tb_usuarios"
 
-    nombre = Column(String, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, nullable=False)
     edad = Column(Integer, nullable=False)
